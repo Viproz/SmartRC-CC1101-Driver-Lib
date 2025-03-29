@@ -162,9 +162,9 @@ public:
   byte CheckReceiveFlag(void);
   byte ReceiveData(byte *rxBuffer);
   bool CheckCRC(void);
-  void SpiStrobe(byte strobe);
+  byte SpiStrobe(byte strobe);
   void SpiWriteReg(byte addr, byte value);
-  void SpiWriteBurstReg(byte addr, byte *buffer, byte num);
+  byte SpiWriteBurstReg(byte addr, byte *buffer, byte num);
   byte SpiReadReg(byte addr);
   void SpiReadBurstReg(byte addr, byte *buffer, byte num);
   void setClb(byte b, byte s, byte e);

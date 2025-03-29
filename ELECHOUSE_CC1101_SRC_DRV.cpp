@@ -188,20 +188,22 @@ void ELECHOUSE_CC1101::SpiWriteReg(byte addr, byte value)
 *INPUT        :addr: register address; buffer:register value array; num:number to write
 *OUTPUT       :none
 ****************************************************************/
-void ELECHOUSE_CC1101::SpiWriteBurstReg(byte addr, byte *buffer, byte num)
+byte ELECHOUSE_CC1101::SpiWriteBurstReg(byte addr, byte *buffer, byte num)
 {
   byte i, temp;
   SpiStart();
   temp = addr | WRITE_BURST;
   digitalWrite(SS_PIN, LOW);
   while(digitalRead(MISO_PIN));
-  SPI.transfer(temp);
+  byte resp = SPI.transfer(temp);
   for (i = 0; i < num; i++)
   {
   SPI.transfer(buffer[i]);
   }
   digitalWrite(SS_PIN, HIGH);
   SpiEnd();
+
+  return resp;
 }
 /****************************************************************
 *FUNCTION NAME:SpiStrobe
@@ -209,14 +211,16 @@ void ELECHOUSE_CC1101::SpiWriteBurstReg(byte addr, byte *buffer, byte num)
 *INPUT        :strobe: command; //refer define in CC1101.h//
 *OUTPUT       :none
 ****************************************************************/
-void ELECHOUSE_CC1101::SpiStrobe(byte strobe)
+byte ELECHOUSE_CC1101::SpiStrobe(byte strobe)
 {
   SpiStart();
   digitalWrite(SS_PIN, LOW);
   while(digitalRead(MISO_PIN));
-  SPI.transfer(strobe);
+  byte resp = SPI.transfer(strobe);
   digitalWrite(SS_PIN, HIGH);
   SpiEnd();
+  
+  return resp;
 }
 /****************************************************************
 *FUNCTION NAME:SpiReadReg
