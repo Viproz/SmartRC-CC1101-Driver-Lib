@@ -219,7 +219,7 @@ byte ELECHOUSE_CC1101::SpiStrobe(byte strobe)
   byte resp = SPI.transfer(strobe);
   digitalWrite(SS_PIN, HIGH);
   SpiEnd();
-  
+
   return resp;
 }
 /****************************************************************
@@ -235,8 +235,8 @@ byte ELECHOUSE_CC1101::SpiReadReg(byte addr)
   temp = addr| READ_SINGLE;
   digitalWrite(SS_PIN, LOW);
   while(digitalRead(MISO_PIN));
-  SPI.transfer(temp);
-  value=SPI.transfer(0);
+  value=SPI.transfer(temp);
+  SPI.transfer(0);
   digitalWrite(SS_PIN, HIGH);
   SpiEnd();
   return value;
