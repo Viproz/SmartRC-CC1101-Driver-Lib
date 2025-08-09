@@ -88,13 +88,28 @@ uint8_t PA_TABLE_915[10] {0x03,0x0E,0x1E,0x27,0x38,0x8E,0x84,0xCC,0xC3,0xC0,};  
 ****************************************************************/
 bool waitForMisoLow() {
     uint32_t start = millis();
-    while (digitalRead(MISO_PIN)) {
+    while (
+#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
+      // Use of gpio_get_level for ESP32 is necessary because SPI makes the pin not a GPIO pin
+      gpio_get_level((gpio_num_t)MISO_PIN)
+#else
+      digitalRead(MISO_PIN)
+#endif
+    ) {
         if (millis() - start > MISO_TIMEOUT) {
             return false; // Timed out
         }
         delay(0); // Yield to allow other tasks to run
     }
     return true;
+}
+
+void writeSPIPin(uint8_t pin, uint8_t value) {
+#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
+  gpio_set_level((gpio_num_t)pin, value);
+#else
+  digitalWrite(pin, value);
+#endif
 }
 
 /****************************************************************
@@ -159,15 +174,15 @@ void ELECHOUSE_CC1101::GDO0_Set (void)
 ****************************************************************/
 bool ELECHOUSE_CC1101::Reset (void)
 {
-	digitalWrite(SS_PIN, LOW);
+	writeSPIPin(SS_PIN, LOW);
 	delay(1);
-	digitalWrite(SS_PIN, HIGH);
+	writeSPIPin(SS_PIN, HIGH);
 	delay(1);
-	digitalWrite(SS_PIN, LOW);
+	writeSPIPin(SS_PIN, LOW);
   if(!waitForMisoLow()) return false;
   SPI.transfer(CC1101_SRES);
   if(!waitForMisoLow()) return false;
-	digitalWrite(SS_PIN, HIGH);
+	writeSPIPin(SS_PIN, HIGH);
 
   return true;
 }
@@ -181,9 +196,9 @@ bool ELECHOUSE_CC1101::Init(void)
 {
   setSpi();
   SpiStart();                   //spi initialization
-  digitalWrite(SS_PIN, HIGH);
-  digitalWrite(SCK_PIN, HIGH);
-  digitalWrite(MOSI_PIN, LOW);
+  writeSPIPin(SS_PIN, HIGH);
+  writeSPIPin(SCK_PIN, HIGH);
+  writeSPIPin(MOSI_PIN, LOW);
 
   //CC1101 reset
   if(!Reset()) 
@@ -204,11 +219,11 @@ bool ELECHOUSE_CC1101::Init(void)
 void ELECHOUSE_CC1101::SpiWriteReg(byte addr, byte value)
 {
   SpiStart();
-  digitalWrite(SS_PIN, LOW);
+  writeSPIPin(SS_PIN, LOW);
   waitForMisoLow();
   SPI.transfer(addr);
   SPI.transfer(value); 
-  digitalWrite(SS_PIN, HIGH);
+  writeSPIPin(SS_PIN, HIGH);
   SpiEnd();
 }
 /****************************************************************
@@ -222,14 +237,14 @@ byte ELECHOUSE_CC1101::SpiWriteBurstReg(byte addr, byte *buffer, byte num)
   byte i, temp;
   SpiStart();
   temp = addr | WRITE_BURST;
-  digitalWrite(SS_PIN, LOW);
+  writeSPIPin(SS_PIN, LOW);
   waitForMisoLow();
   byte resp = SPI.transfer(temp);
   for (i = 0; i < num; i++)
   {
   SPI.transfer(buffer[i]);
   }
-  digitalWrite(SS_PIN, HIGH);
+  writeSPIPin(SS_PIN, HIGH);
   SpiEnd();
 
   return resp;
@@ -243,10 +258,10 @@ byte ELECHOUSE_CC1101::SpiWriteBurstReg(byte addr, byte *buffer, byte num)
 byte ELECHOUSE_CC1101::SpiStrobe(byte strobe)
 {
   SpiStart();
-  digitalWrite(SS_PIN, LOW);
+  writeSPIPin(SS_PIN, LOW);
   waitForMisoLow();
   byte resp = SPI.transfer(strobe);
-  digitalWrite(SS_PIN, HIGH);
+  writeSPIPin(SS_PIN, HIGH);
   SpiEnd();
   
   return resp;
@@ -262,11 +277,11 @@ byte ELECHOUSE_CC1101::SpiReadReg(byte addr)
   byte temp, value;
   SpiStart();
   temp = addr| READ_SINGLE;
-  digitalWrite(SS_PIN, LOW);
+  writeSPIPin(SS_PIN, LOW);
   waitForMisoLow();
   SPI.transfer(temp);
   value=SPI.transfer(0);
-  digitalWrite(SS_PIN, HIGH);
+  writeSPIPin(SS_PIN, HIGH);
   SpiEnd();
   return value;
 }
@@ -282,14 +297,14 @@ void ELECHOUSE_CC1101::SpiReadBurstReg(byte addr, byte *buffer, byte num)
   byte i,temp;
   SpiStart();
   temp = addr | READ_BURST;
-  digitalWrite(SS_PIN, LOW);
+  writeSPIPin(SS_PIN, LOW);
   waitForMisoLow();
   SPI.transfer(temp);
   for(i=0;i<num;i++)
   {
   buffer[i]=SPI.transfer(0);
   }
-  digitalWrite(SS_PIN, HIGH);
+  writeSPIPin(SS_PIN, HIGH);
   SpiEnd();
 }
 
@@ -304,11 +319,11 @@ byte ELECHOUSE_CC1101::SpiReadStatus(byte addr)
   byte value,temp;
   SpiStart();
   temp = addr | READ_BURST;
-  digitalWrite(SS_PIN, LOW);
+  writeSPIPin(SS_PIN, LOW);
   waitForMisoLow();
   SPI.transfer(temp);
   value=SPI.transfer(0);
-  digitalWrite(SS_PIN, HIGH);
+  writeSPIPin(SS_PIN, HIGH);
   SpiEnd();
   return value;
 }
