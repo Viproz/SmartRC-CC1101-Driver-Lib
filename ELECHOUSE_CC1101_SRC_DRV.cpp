@@ -104,6 +104,13 @@ bool waitForMisoLow() {
     return true;
 }
 
+/****************************************************************
+*FUNCTION NAME:writeSPIPin
+*FUNCTION     :Write value to SPI pin
+*INPUT        :pin: pin number; value: value to write
+*OUTPUT       :none
+*NOTE         : This function is used to write a value to a specific SPI pin, ensuring compatibility with ESP32 and other platforms.
+****************************************************************/
 void writeSPIPin(uint8_t pin, uint8_t value) {
 #if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
   gpio_set_level((gpio_num_t)pin, value);
@@ -240,9 +247,8 @@ byte ELECHOUSE_CC1101::SpiWriteBurstReg(byte addr, byte *buffer, byte num)
   writeSPIPin(SS_PIN, LOW);
   waitForMisoLow();
   byte resp = SPI.transfer(temp);
-  for (i = 0; i < num; i++)
-  {
-  SPI.transfer(buffer[i]);
+  for (i = 0; i < num; i++) {
+    resp = SPI.transfer(buffer[i]);
   }
   writeSPIPin(SS_PIN, HIGH);
   SpiEnd();
