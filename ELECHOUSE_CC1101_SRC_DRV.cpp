@@ -256,6 +256,29 @@ byte ELECHOUSE_CC1101::SpiWriteBurstReg(byte addr, byte *buffer, byte num)
   return resp;
 }
 /****************************************************************
+*FUNCTION NAME:SpiWriteBurstMaxReg
+*FUNCTION     :CC1101 write burst data to register
+*INPUT        :addr: register address; buffer:register value array; num:number to write
+*OUTPUT       :none
+****************************************************************/
+byte ELECHOUSE_CC1101::SpiWriteBurstMaxReg(byte addr, byte *buffer, byte maxNum, byte *written)
+{
+  byte i, temp;
+  SpiStart();
+  temp = addr | WRITE_BURST;
+  writeSPIPin(SS_PIN, LOW);
+  waitForMisoLow();
+  byte resp = SPI.transfer(temp);
+  for (i = 0; i < maxNum && (resp & 0x0F) > 0; i++) {
+    resp = SPI.transfer(buffer[i]);
+  }
+  *written = i;
+  writeSPIPin(SS_PIN, HIGH);
+  SpiEnd();
+
+  return resp;
+}
+/****************************************************************
 *FUNCTION NAME:SpiStrobe
 *FUNCTION     :CC1101 Strobe
 *INPUT        :strobe: command; //refer define in CC1101.h//

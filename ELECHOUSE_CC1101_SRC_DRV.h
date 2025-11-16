@@ -165,6 +165,7 @@ public:
   byte SpiStrobe(byte strobe);
   void SpiWriteReg(byte addr, byte value);
   byte SpiWriteBurstReg(byte addr, byte *buffer, byte num);
+  byte SpiWriteBurstMaxReg(byte addr, byte *buffer, byte maxNum, byte *written);
   byte SpiReadReg(byte addr);
   void SpiReadBurstReg(byte addr, byte *buffer, byte num);
   void setClb(byte b, byte s, byte e);
