@@ -211,7 +211,6 @@ bool ELECHOUSE_CC1101::Init(void)
   if(!Reset()) 
     return false;
 
-  SpiEnd();
   //CC1101 register config
   RegConfigSettings();
 
@@ -225,13 +224,11 @@ bool ELECHOUSE_CC1101::Init(void)
 ****************************************************************/
 void ELECHOUSE_CC1101::SpiWriteReg(byte addr, byte value)
 {
-  SpiStart();
   writeSPIPin(SS_PIN, LOW);
   waitForMisoLow();
   SPI.transfer(addr);
   SPI.transfer(value); 
   writeSPIPin(SS_PIN, HIGH);
-  SpiEnd();
 }
 /****************************************************************
 *FUNCTION NAME:SpiWriteBurstReg
@@ -242,7 +239,6 @@ void ELECHOUSE_CC1101::SpiWriteReg(byte addr, byte value)
 byte ELECHOUSE_CC1101::SpiWriteBurstReg(byte addr, byte *buffer, byte num)
 {
   byte i, temp;
-  SpiStart();
   temp = addr | WRITE_BURST;
   writeSPIPin(SS_PIN, LOW);
   waitForMisoLow();
@@ -251,7 +247,6 @@ byte ELECHOUSE_CC1101::SpiWriteBurstReg(byte addr, byte *buffer, byte num)
     resp = SPI.transfer(buffer[i]);
   }
   writeSPIPin(SS_PIN, HIGH);
-  SpiEnd();
 
   return resp;
 }
@@ -264,7 +259,6 @@ byte ELECHOUSE_CC1101::SpiWriteBurstReg(byte addr, byte *buffer, byte num)
 byte ELECHOUSE_CC1101::SpiWriteBurstMaxReg(byte addr, byte *buffer, byte maxNum, byte *written)
 {
   byte i, temp;
-  SpiStart();
   temp = addr | WRITE_BURST;
   writeSPIPin(SS_PIN, LOW);
   waitForMisoLow();
@@ -274,7 +268,6 @@ byte ELECHOUSE_CC1101::SpiWriteBurstMaxReg(byte addr, byte *buffer, byte maxNum,
   }
   *written = i;
   writeSPIPin(SS_PIN, HIGH);
-  SpiEnd();
 
   return resp;
 }
@@ -286,12 +279,10 @@ byte ELECHOUSE_CC1101::SpiWriteBurstMaxReg(byte addr, byte *buffer, byte maxNum,
 ****************************************************************/
 byte ELECHOUSE_CC1101::SpiStrobe(byte strobe)
 {
-  SpiStart();
   writeSPIPin(SS_PIN, LOW);
   waitForMisoLow();
   byte resp = SPI.transfer(strobe);
   writeSPIPin(SS_PIN, HIGH);
-  SpiEnd();
   
   return resp;
 }
@@ -304,14 +295,12 @@ byte ELECHOUSE_CC1101::SpiStrobe(byte strobe)
 byte ELECHOUSE_CC1101::SpiReadReg(byte addr) 
 {
   byte temp, value;
-  SpiStart();
   temp = addr| READ_SINGLE;
   writeSPIPin(SS_PIN, LOW);
   waitForMisoLow();
   SPI.transfer(temp);
   value=SPI.transfer(0);
   writeSPIPin(SS_PIN, HIGH);
-  SpiEnd();
   return value;
 }
 
@@ -324,7 +313,6 @@ byte ELECHOUSE_CC1101::SpiReadReg(byte addr)
 void ELECHOUSE_CC1101::SpiReadBurstReg(byte addr, byte *buffer, byte num)
 {
   byte i,temp;
-  SpiStart();
   temp = addr | READ_BURST;
   writeSPIPin(SS_PIN, LOW);
   waitForMisoLow();
@@ -334,7 +322,6 @@ void ELECHOUSE_CC1101::SpiReadBurstReg(byte addr, byte *buffer, byte num)
   buffer[i]=SPI.transfer(0);
   }
   writeSPIPin(SS_PIN, HIGH);
-  SpiEnd();
 }
 
 /****************************************************************
@@ -346,14 +333,12 @@ void ELECHOUSE_CC1101::SpiReadBurstReg(byte addr, byte *buffer, byte num)
 byte ELECHOUSE_CC1101::SpiReadStatus(byte addr) 
 {
   byte value,temp;
-  SpiStart();
   temp = addr | READ_BURST;
   writeSPIPin(SS_PIN, LOW);
   waitForMisoLow();
   SPI.transfer(temp);
   value=SPI.transfer(0);
   writeSPIPin(SS_PIN, HIGH);
-  SpiEnd();
   return value;
 }
 /****************************************************************
