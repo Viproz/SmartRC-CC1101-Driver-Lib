@@ -256,9 +256,10 @@ byte ELECHOUSE_CC1101::SpiWriteBurstReg(byte addr, byte *buffer, byte num)
 *INPUT        :addr: register address; buffer:register value array; num:number to write
 *OUTPUT       :none
 ****************************************************************/
-byte ELECHOUSE_CC1101::SpiWriteBurstMaxReg(byte addr, byte *buffer, byte maxNum, byte *written)
+byte ELECHOUSE_CC1101::SpiWriteBurstMaxReg(byte addr, byte *buffer, int maxNum, int *written)
 {
-  byte i, temp;
+  int i;
+  byte temp;
   temp = addr | WRITE_BURST;
   writeSPIPin(SS_PIN, LOW);
   waitForMisoLow();
