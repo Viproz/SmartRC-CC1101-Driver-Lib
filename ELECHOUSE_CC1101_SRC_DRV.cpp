@@ -952,27 +952,25 @@ SpiWriteReg(16,m4RxBw+m4DaRa);
 *OUTPUT       :none
 ****************************************************************/
 void ELECHOUSE_CC1101::setDRate(float d){
-Split_MDMCFG4();
-float c = d;
-byte MDMCFG3 = 0;
-if (c > 1621.83){c = 1621.83;}
-if (c < 0.0247955){c = 0.0247955;}
-m4DaRa = 0;
-for (int i = 0; i<20; i++){
-if (c <= 0.0494942){
-c = c - 0.0247955;
-c = c / 0.00009685;
-MDMCFG3 = c;
-float s1 = (c - MDMCFG3) *10;
-if (s1 >= 5){MDMCFG3++;}
-i = 20;
-}else{
-m4DaRa++;
-c = c/2;
-}
-}
-SpiWriteReg(16,  m4RxBw+m4DaRa);
-SpiWriteReg(17,  MDMCFG3);
+  // Read register used for both Rx & Tx
+  Split_MDMCFG4();
+
+  d = d * 1000; // Convert from kbps to bps
+
+  // Calculate Exponent and Mantissa according to datasheet formula
+  int drate_E = std::log2((double)d * std::pow(2., 20.) / 26.e6);
+  int drate_M = std::round((d * std::pow(2., 28. - drate_E)) / 26.e6 - 256.);
+
+  if (drate_M == 256) {
+    drate_M = 0;
+    drate_E += 1;
+  }
+
+  m4DaRa = drate_E;
+  
+  // Write the result
+  SpiWriteReg(16,  m4RxBw+m4DaRa);
+  SpiWriteReg(17,  (byte)drate_M);
 }
 /****************************************************************
 *FUNCTION NAME:Set Devitation
